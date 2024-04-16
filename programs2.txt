@@ -1,0 +1,603 @@
+//MCS
+
+#include<iostream>
+#include<fstream>
+#include<limits.h>
+#include<stdlib.h>
+using namespace std;
+void getInput(int p[], int n)
+{
+ofstream fout;
+fout.open("input.txt");
+srand((long int)clock());
+for(int i=0;i<n;i++)
+{
+fout<<rand() % 30<<"\t";
+}
+fout.close();
+ifstream fin;
+fin.open("input.txt");
+for(int i=0;i<n;i++)
+{
+fin>>p[i];
+}
+}
+int Matrix_Chain_Order(int p[],int n,int &count)
+{
+int m[n][n],s[n][n];
+int q,k;
+for(int i=1;i<=n;i++)
+{
+m[i][i] = 0;
+}
+for(int l=2;l<=n-1;l++)
+{
+for(int i=1;i<=n-1;i++)
+{
+int j = i+l;
+m[i][j] = INT_MAX;
+for(k=i;k<=j-1;k++)
+{
+count = count + 1;
+q = m[i][k] + m[k][j]+p[i-1]*p[k]*p[j];
+if(q<m[i][j])
+{
+m[i][j] = q;
+s[i][j] = k;
+}
+}
+}
+}
+return q,k;
+}
+void Print_Opt_Order(int s[],int i,int j)
+{
+if(i==j)
+{
+cout<<s<<i<<endl;
+}
+else
+{
+cout<<"(";
+Print_Opt_Order(s,i,s[i,j]);
+Print_Opt_Order(s,s[i,j]+1,j);
+cout<<" )"<<endl;
+}
+}
+int Rec_Mat_Chain(int p[],int i,int j,int &count)
+{
+if(i==j)
+{
+return 0;
+}
+long int t= INT_MAX;
+long int q;
+for(int k=i;k<=j-1;k++)
+{
+count +=1;
+q = Rec_Mat_Chain(p,i,k,count) + Rec_Mat_Chain(p,k+1,j,count) + p[i-1]*p[k]*p[j];
+if(q<t)
+{
+t=q;
+}
+}
+return t;
+}
+int main()
+{
+int n;
+cout<<"Enter the Number of Dimensions :";
+cin>>n;
+int p[n];
+int count = 0;
+getInput(p,n);
+for(int i=0;i<n;i++)
+{
+cout<<p[i]<<endl;
+}
+int i,j;
+cout<<"Enter the Value of i and j : "<<endl;
+cin>>i>>j;
+cout<<"Multiplications : "<<Rec_Mat_Chain(p,i,j,count)<<endl;
+cout<<"Divide and Conquer Operations : "<<count<<endl;
+int a,b;
+count = 0;
+a,b = Matrix_Chain_Order(p,n,count);
+cout<<a<<endl;
+cout<<"Dynamic Programming Operations : "<<count<<endl;
+return 0;
+}
+
+
+//Activity Selection
+
+#include<iostream>
+#include<set>
+using namespace std;
+set<int> Greedy_Activity_Selector(int S[],int s[],int f[],int n)
+{
+set<int>A;
+A.insert(S[0]);
+int k = 0;
+int count = 1;
+for(int m=1;m<n;m++)
+{
+if(s[m] >= f[k])
+{
+A.insert(S[m]);
+k = m;
+}
+}
+return A;
+}
+set<int> RecursiveActivitySelector(int S[],const int s[], const int f[], int k, int n)
+{
+int m = k + 1;
+while (m <= n && s[m] < f[k]) {
+m++;
+}
+if (m <= n) {
+set<int> A = RecursiveActivitySelector(S,s, f, m, n);
+A.insert(S[0]);
+A.insert(S[m]);
+return A;
+} else {
+return set<int>();
+}
+}
+int main()
+{
+int n;
+cout<<"Enter the Total No. of Activities : "<<endl;
+cin>>n;
+int S[n],s[n],f[n];
+for(int i=0;i<n;i++)
+{
+S[i] = i+1;
+cout<<"Enter the Start Time of Activity "<<i+1<<" : ";
+cin>>s[i];
+cout<<"Enter the Final Time of Activity "<<i+1<<" : ";
+cin>>f[i];
+}
+cout<<"[ ";
+for(int i=0;i<n;i++)
+{
+cout<<S[i]<<" ";
+}
+cout<<"]"<<endl;
+cout<<"[ ";
+for(int i=0;i<n;i++)
+{
+cout<<s[i]<<" ";
+}
+cout<<"]"<<endl;
+cout<<"[ ";
+for(int i=0;i<n;i++)
+{
+cout<<f[i]<<" ";
+}
+cout<<"]"<<endl;
+for(int i=0;i<n-1;i++)
+{
+for(int j=0;j<n-i-1;j++)
+{
+if(f[j] > f[j+1])
+{
+swap(f[j],f[j+1]);
+swap(S[j],S[j+1]);
+swap(s[j],s[j+1]);
+}
+}
+}
+cout<<"After Sorting : "<<endl;
+cout<<"[ ";
+for(int i=0;i<n;i++)
+{
+cout<<S[i]<<" ";
+}
+cout<<"]"<<endl;
+cout<<"[ ";
+for(int i=0;i<n;i++)
+{
+cout<<s[i]<<" ";
+}
+cout<<"]"<<endl;
+cout<<"[ ";
+for(int i=0;i<n;i++)
+{
+cout<<f[i]<<" ";
+}
+cout<<"]"<<endl;
+set<int>A = Greedy_Activity_Selector(S,s,f,n);
+cout<<"Greedy Algorithm : "<<endl;
+cout<<"The Activities must be Selected in this Order : [ ";
+set<int>::iterator itr;
+for(itr = A.begin(); itr != A.end();itr++)
+{
+cout<<*itr<<" ";
+}
+cout<<"]"<<endl;
+cout<<"Recursive Algorithm : "<<endl;
+set<int>B = RecursiveActivitySelector(S,s,f,0,n);
+cout<<"The Activities must be Selected in this Order : [ ";
+set<int>::iterator itr1;
+for(itr1 = B.begin(); itr1 != B.end();itr1++)
+{
+cout<<*itr1<<" ";
+}
+cout<<"]"<<endl;
+return 0;
+}
+
+//LCS
+
+#include<iostream>
+#include<fstream>
+#include<stdlib.h>
+#include<time.h>
+#include<cstring>
+using namespace std;
+void getInput(string &X,string &Y,int m,int n)
+{
+string line;
+char S[] = {'A','B','C'};
+ofstream fout("lcs_input.txt");
+for(int i=0;i<m;i++)
+{
+fout<<S[rand() % 3];
+}
+fout<<endl;
+for(int i=0;i<n;i++)
+{
+fout<<S[rand() % 3];
+}
+fout.close();
+ifstream fin("lcs_input.txt");
+getline(fin,X);
+cout<<X<<endl;;
+getline(fin,Y);
+cout<<Y<<endl;
+}
+void PRINT_LCS(string X, int i, int j) {
+if (i == 0 || j == 0)
+return;
+char b[i + 1][j + 1];
+if (b[i][j] == '↖') {
+PRINT_LCS(X, i - 1, j - 1);
+cout << X[i - 1];
+} else if (b[i][j] == '↑') {
+PRINT_LCS(X, i - 1, j);
+} else {
+PRINT_LCS(X, i, j - 1);
+}
+}
+int LCS_LENGTH_TD(string X, string Y, int** c, int i, int j, int& count) {
+if (i == 0 || j == 0)
+return 0;
+if (c[i][j] != -1)
+return c[i][j];
+count++; // Increment comparison count
+if (X[i - 1] == Y[j - 1]) {
+c[i][j] = LCS_LENGTH_TD(X, Y, c, i - 1, j - 1, count) + 1;
+} else {
+c[i][j] = max(LCS_LENGTH_TD(X, Y, c, i - 1, j, count), LCS_LENGTH_TD(X, Y, c, i, j - 1,
+count));
+}
+return c[i][j];
+}
+int LCS_LENGTH_BU(string X,string Y,int m,int n,int &count)
+{
+int L[m+1][n+1];
+for(int i=0;i<=m;i++)
+{
+L[i][0] = 0;
+}
+for(int j=0;j<=n;j++)
+{
+L[0][j] = 0;
+}
+for(int i=1;i<=m;i++)
+{
+for(int j=1;j<=n;j++)
+{
+count += 1;
+if(X[i-1] == Y[j-1])
+{
+L[i][j] = 1+ L[i-1][j-1];
+}
+else
+{
+L[i][j] = max(L[i-1][j],L[i][j-1]);
+}
+}
+}
+return L[m][n];
+}
+int LCS_LENGTH_DC(string X,string Y,int m,int n,int &count)
+{
+count += 1;
+if(m==0 || n==0)
+{
+return 0;
+}
+else
+{
+if(X[m-1] == Y[n-1])
+{
+return 1 + LCS_LENGTH_DC(X,Y,m-1,n-1,count);
+}
+else
+{
+int t1 = LCS_LENGTH_DC(X,Y,m-1,n,count);
+int t2 = LCS_LENGTH_DC(X,Y,m,n-1,count);
+if(t1 >= t2)
+{
+return t1;
+}
+else
+{
+return t2;
+}
+}
+}
+}
+int main()
+{
+int m,n;
+cout<<"Enter the Length of First String(M) : ";
+cin>>m;
+cout<<"Enter the Length for Second String(N) : ";
+cin>>n;
+string X,Y;
+getInput(X,Y,m,n);
+int length,count =0;
+length = LCS_LENGTH_DC(X,Y,m,n,count);
+cout<<"Length of the Longest Common Subsequence using DC is : "<<length<<endl;
+cout<<"Total No. of Comparisons using DC : "<<count<<endl;
+count = 0;
+length = LCS_LENGTH_BU(X,Y,m,n,count);
+cout<<"Length of the Longest Subsequence using Bottom Up : "<<length<<endl;
+cout<<"Total No. of Comparisons using Bottom-Up Approach : "<<count<<endl;
+count = 0;
+int** memo = new int*[m + 1];
+for (int i = 0; i <= m; ++i) {
+memo[i] = new int[n + 1];
+for (int j = 0; j <= n; ++j) {
+memo[i][j] = -1;
+}
+}
+// Counter to track the number of comparisons
+int comparisonCount = 0;
+// Compute LCS length using top-down dynamic programming
+int lcsLength = LCS_LENGTH_TD(X, Y, memo, m, n, comparisonCount);
+cout << "Length of Longest Common Subsequence: " << lcsLength << endl;
+cout << "Total Number of Comparisons using Top-Down Approach : " <<
+comparisonCount << endl;
+// Deallocate memoization table
+for (int i = 0; i <= m; ++i) {
+delete[] memo[i];
+}
+delete[] memo;
+PRINT_LCS(X,m-1,n-1);
+return 0;
+}
+
+//Sum Of Subsets
+
+#include<iostream>
+using namespace std;
+void BackTrack(int A[],int n,int target,int Subset[],int SubsetSize,int start,int sum)
+{
+if (sum == target)
+{
+cout<<"[ ";
+for(int i=0;i<SubsetSize;++i)
+{
+cout<<Subset[i]<<" ";
+}
+cout<<"]"<<endl;
+}
+for(int i=start;i<n;i++)
+{
+if(A[i] + sum <= target)
+{
+Subset[SubsetSize++] = A[i];
+BackTrack(A,n,target,Subset,SubsetSize,i+1,sum + A[i]) ;
+SubsetSize -= 1;
+}
+}
+}
+void findSubsets(int A[],int n,int target)
+{
+int Subset[n];
+int SubsetSize = 0;
+BackTrack(A,n,target,Subset,SubsetSize,0,0);
+}
+int main(){
+int n;
+cout<<"Enter the No. of Elements in Array : ";
+cin>>n;
+int A[n];
+cout<<"Enter the Elements of the Array : "<<endl;
+for(int i=0;i<n;i++)
+{
+cout<<"Element No."<<i+1<<" : ";
+cin>>A[i];
+}
+int target;
+cout<<"Enter the Target Sum : ";
+cin>>target;
+cout<<"All Possible Subsets : "<<endl;
+cout<<endl;
+findSubsets(A,n,target);
+return 0;
+}
+
+
+//FloydWarshall
+
+#include<iostream>
+using namespace std;
+void initialize(int W[][5], int D[][5], int Pi[][5])
+{
+int n = 5;
+for(int i=0;i<n;i++)
+{
+for(int j=0;j<n;j++)
+{
+D[i][j] = W[i][j];
+if(i == j || W[i][j] > 999)
+Pi[i][j] = 0;
+else
+Pi[i][j] = i+1;
+}
+}
+}
+void floydWarshall(int D[][5], int Pi[][5])
+{
+int n = 5;
+for(int k=0;k<n;k++)
+{
+for(int i=0;i<n;i++)
+{
+for(int j=0;j<n;j++)
+{
+if(Pi[i][k] != 0 && Pi[k][j] != 0 && D[i][j] > (D[i][k] + D[k][j]))
+{
+D[i][j] = D[i][k] + D[k][j];
+Pi[i][j] = Pi[k][j];
+}
+}
+}
+}
+}
+int main(void)
+{
+int W[5][5],D[5][5],Pi[5][5];
+cout<<"Enter input matrix:\n";
+for(int i=0;i<5;i++)
+{
+for(int j=0;j<5;j++)
+cin>>W[i][j];
+}
+initialize(W,D,Pi);
+floydWarshall(D,Pi);
+cout<<"D matrix:\n";
+for(int i=0;i<5;i++)
+{
+for(int j=0;j<5;j++)
+cout<<D[i][j]<<"\t";
+cout<<endl;
+}
+cout<<"Pi matrix:\n";
+for(int i=0;i<5;i++)
+{
+for(int j=0;j<5;j++)
+cout<<Pi[i][j]<<"\t";
+cout<<endl;
+}
+}
+
+//Bellman Ford
+
+#include<iostream>
+#include<climits>
+using namespace std;
+struct node
+{
+int from;
+int to;
+int weight;
+node* next;
+};
+struct vnode
+{
+string name;
+int d;
+int pi;
+};
+class graph
+{
+int m,n;
+vnode vertex[10];
+node* elist;
+public:
+void createGraph(int n1,int m1)
+{
+n = n1;
+for(int i=0 ; i<n ; i++)
+vertex[i].name = (i+1);
+m = m1;
+elist = NULL;
+node* last = NULL;
+for(int j=0 ; j<m ; j++)
+{
+node* t = new node;
+cout<<"from:";
+cin>>t->from;
+cout<<"to:";
+cin>>t->to;
+cout<<"weight:";
+cin>>t->weight;
+t->next = NULL;
+if(last == NULL)
+elist = t;
+else
+last->next = t;
+last = t;
+}
+}
+void initializeSingleSource(int s)
+{
+for(int i=0 ; i<n ; i++)
+{
+vertex[i].d = INT_MAX;
+vertex[i].pi = 0;
+}
+vertex[s].d = 0;
+}
+void relax(int u,int v,int w)
+{
+if(vertex[v].d > (vertex[u].d+w))
+{
+vertex[v].d = vertex[u].d + u;
+vertex[v].pi = u;
+}
+}
+bool bellFord(int s)
+{
+initializeSingleSource(s);
+for(int i=0; i<n-1; i++)
+{
+node* t = elist;
+while(t != NULL)
+{
+relax(t->from,t->to,t->weight);
+t = t->next;
+}
+delete(t);
+}
+node* t = elist;
+while(t != NULL)
+{
+cout<<t->from<<"->("<<t->weight<<")->"<<t->to<<"\t";
+if(vertex[t->to].d > (vertex[t->from].d + t->weight))
+return false;
+t = t->next;
+}
+cout<<endl;
+return true;
+}
+};
+int main(void)
+{
+graph g;
+int m,n,s;
+cout<<"No.of vertices & edges:";
+cin>>n>>m;
+g.createGraph(n,m);
+cout<<"Source vertex:";
+cin>>s;
+bool x = g.bellFord(s-1);
+cout<<x<<endl;
+}
